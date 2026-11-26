@@ -1,10 +1,17 @@
 /* ==========================================================================
-   Silicon Valley 101 × 未来陪伴局 V5 Standard Visual Base (1920x1080 @ 30fps)
-   - Packaging Headline Font : CangEr (仓耳体.ttf)
-   - Subtitle Font           : Song (风雅宋.ttf, pure white + soft shadow, NO stroke)
-   - Brand Highlight         : #FFA800 | Alert Red : #FF3B30 | Canvas : #0E0F12
-   - Anti-1-Frame-Flash      : .sv-layer enforces opacity:0 + isolation:isolate
+   Silicon Valley 101 × 未来陪伴局 V5.1 Master Visual System (1920x1080 @ 30fps)
+   - ZERO dark shadow halos / smudges under display typography (strictly enforced!)
+   - Constant 42px Full-Episode Bottom Chapter Bar (Frame 0 -> Final Frame!)
+   - 130-Year Era Node Tree / Timeline Progress Track (#sv-era-tree)
+   - Broadcast-Safe Source Attribution (top: 38px, left: 48px)
    ========================================================================== */
+
+@font-face {
+  font-family: Sans;
+  src: url("assets/fonts/Sans.otf") format("opentype");
+  font-weight: 400 700;
+  font-style: normal;
+}
 
 @font-face {
   font-family: CangEr;
@@ -22,11 +29,12 @@
 
 :root {
   --sv-canvas: #0e0f12;
-  --sv-panel-dark: #14161a;
+  --sv-panel-dark: #14161b;
   --sv-orange: #ffa800;
   --sv-red: #ff3b30;
+  --sv-cyan: #50ebe0;
   --sv-white: #ffffff;
-  --sv-muted: rgba(255, 255, 255, 0.52);
+  --sv-muted: rgba(255, 255, 255, 0.62);
 }
 
 * {
@@ -39,9 +47,9 @@ html, body {
   width: 1920px;
   height: 1080px;
   overflow: hidden;
-  background: #000000;
+  background: #0e0f12;
   color: var(--sv-white);
-  font-family: CangEr, -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+  font-family: CangEr, Sans, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -50,11 +58,17 @@ html, body {
   width: 1920px;
   height: 1080px;
   overflow: hidden;
-  background: #000000;
+  background: #0e0f12;
 }
 
-/* CRITICAL: Prevents Hyperframes <video data-start> from flashing 1 frame early
-   or leaking child z-index layers across adjacent shots */
+#seam-stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  transform-origin: 50% 50%;
+}
+
+/* Deterministic anti-flash layer container */
 .sv-layer {
   position: absolute;
   inset: 0;
@@ -77,12 +91,19 @@ html, body {
   object-fit: cover;
 }
 
-/* 4:3 Archival Video Pillarbox-Blur Stage (preserves grain, ZERO frame border) */
+.sv-scrim-dark {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 84% 78% at 50% 48%, rgba(10, 11, 14, 0.24) 0%, rgba(10, 11, 14, 0.68) 100%);
+  pointer-events: none;
+}
+
+/* 4:3 Archival Video Pillarbox-Blur Stage */
 .sv-archival-43-stage {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background: #000000;
+  background: #0e0f12;
 }
 .sv-archival-43-bg {
   position: absolute;
@@ -91,7 +112,7 @@ html, body {
   height: 100%;
   object-fit: cover;
   transform: scale(1.42);
-  filter: blur(36px) brightness(0.48) saturate(0.92);
+  filter: blur(38px) brightness(0.42) saturate(0.90);
 }
 .sv-archival-43-fg {
   position: relative;
@@ -100,98 +121,236 @@ html, body {
   width: auto;
   margin: 0 auto;
   object-fit: contain;
-  box-shadow: 0 0 64px rgba(0, 0, 0, 0.72);
 }
 
-/* Near-Black Precision Crosshair Grid Canvas (#0E0F12, matches SV101《1nm》) */
+/* Near-Black Precision Crosshair Grid Canvas (#0E0F12) */
 .sv-schematic-bg {
   position: absolute;
   inset: 0;
   background-color: var(--sv-canvas);
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.032) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.032) 1px, transparent 1px),
-    radial-gradient(circle at 0 0, rgba(255, 255, 255, 0.10) 1.5px, transparent 2px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    radial-gradient(circle at 0 0, rgba(255, 255, 255, 0.11) 1.5px, transparent 2px);
   background-size: 120px 120px;
   background-position: 60px 60px;
 }
 
-/* Top-Left 3rd-Party Source Attribution (22px, 70% white, fades out after 3.0s) */
+/* Broadcast-Safe Top-Left Source Attribution (NEVER clipped, ZERO dark smudge) */
 .sv-source-tag {
   position: absolute;
-  top: 28px;
-  left: 36px;
-  z-index: 90;
-  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
-  font-size: 22px;
+  top: 38px;
+  left: 48px;
+  z-index: 120;
+  padding: 6px 14px;
+  border-radius: 6px;
+  background: rgba(12, 13, 16, 0.56);
+  backdrop-filter: blur(6px);
+  font-family: Sans, sans-serif;
+  font-size: 21px;
   font-weight: 500;
-  line-height: 1.2;
+  line-height: 1.25;
   letter-spacing: 0.02em;
-  color: rgba(255, 255, 255, 0.70);
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85);
+  color: rgba(255, 255, 255, 0.82);
+  text-shadow: none;
   pointer-events: none;
 }
 
-/* Packaging Big Keyword Typography (CangEr >= 120px, max 1 focal group per screen) */
+/* Packaging Display Typography — STRICT ZERO BLACK SHADOW HALO! */
 .sv-big-word {
   font-family: CangEr, sans-serif;
-  font-size: 160px;
-  line-height: 0.96;
+  font-size: 156px;
+  line-height: 0.98;
   letter-spacing: 0.02em;
   color: var(--sv-white);
-  text-shadow: 0 16px 42px rgba(0, 0, 0, 0.88);
+  white-space: nowrap;
+  text-shadow: none !important;
+  filter: none !important;
 }
 .sv-big-word.is-orange { color: var(--sv-orange); }
 .sv-big-word.is-red { color: var(--sv-red); }
+.sv-big-word.is-gray { color: #8c929e; }
 
-/* Constant 38px Bottom Chapter Bar (NO logo block, NO English) */
+/* Chapter Title Card Standard (Silky Motion Backdrop, ZERO Shadow Smudge) */
+.ch-card-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.36) contrast(1.06);
+  transform-origin: 50% 50%;
+}
+.ch-card-text {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+.ch-card-no {
+  font-family: CangEr, sans-serif;
+  font-size: 62px;
+  color: var(--sv-orange);
+  letter-spacing: 0.10em;
+  text-shadow: none !important;
+}
+.ch-card-title {
+  font-family: CangEr, sans-serif;
+  font-size: 152px;
+  color: #ffffff;
+  line-height: 1.04;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  text-shadow: none !important;
+}
+
+/* 130-Year / Multi-Milestone Era Node Tree (#sv-era-tree) */
+#sv-era-tree {
+  position: absolute;
+  top: 34px;
+  right: 48px;
+  width: 1180px;
+  height: 92px;
+  padding: 12px 28px;
+  border-radius: 14px;
+  background: rgba(14, 15, 18, 0.80);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+  z-index: 140;
+  opacity: 0;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+.era-rail-bg {
+  position: absolute;
+  left: 88px;
+  right: 88px;
+  top: 36px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.16);
+}
+#era-rail-fill {
+  position: absolute;
+  left: 88px;
+  top: 36px;
+  height: 3px;
+  width: 0px;
+  background: linear-gradient(90deg, rgba(255, 168, 0, 0.55) 0%, #ffa800 100%);
+}
+.era-nodes-row {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  z-index: 2;
+}
+.era-node {
+  width: 148px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.era-dot {
+  width: 16px;
+  height: 16px;
+  margin-top: 16px;
+  border-radius: 50%;
+  background: #23262f;
+  border: 2.5px solid rgba(255, 255, 255, 0.32);
+}
+.era-yr {
+  font-family: CangEr, sans-serif;
+  font-size: 26px;
+  line-height: 1.0;
+  color: rgba(255, 255, 255, 0.42);
+  text-shadow: none !important;
+}
+.era-tag {
+  font-family: Sans, sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.0;
+  color: rgba(255, 255, 255, 0.34);
+  white-space: nowrap;
+}
+.era-node.is-done .era-dot {
+  background: rgba(255, 168, 0, 0.42);
+  border-color: #ffa800;
+}
+.era-node.is-done .era-yr { color: rgba(255, 208, 120, 0.82); }
+.era-node.is-done .era-tag { color: rgba(255, 255, 255, 0.62); }
+.era-node.is-current { transform: translateY(-3px) scale(1.08); }
+.era-node.is-current .era-dot {
+  width: 20px;
+  height: 20px;
+  margin-top: 14px;
+  background: #ffa800;
+  border: 3px solid #ffffff;
+  box-shadow: 0 0 18px rgba(255, 168, 0, 0.85);
+}
+.era-node.is-current .era-yr { font-size: 32px; color: #ffa800; }
+.era-node.is-current .era-tag { color: #ffffff; font-weight: 600; }
+
+/* Constant 42px Full-Episode Bottom Chapter Bar (100% visible Frame 0 -> Final Frame!) */
 #sv-chapter-bar {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  height: 38px;
-  z-index: 180;
-  background: rgba(12, 13, 16, 0.86);
-  backdrop-filter: blur(8px);
+  height: 42px;
+  z-index: 220;
+  background: rgba(12, 13, 16, 0.90);
+  border-top: 1px solid rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
-  opacity: 0;
+  opacity: 1 !important;
+  visibility: visible !important;
   pointer-events: none;
 }
 #sv-chapter-progress {
   position: absolute;
   left: 0;
-  top: 0;
-  height: 2px;
+  top: -2px;
+  height: 2.5px;
   width: 0%;
   background: var(--sv-orange);
 }
 .sv-ch-item {
   flex: 1;
-  text-align: center;
-  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
-  font-size: 20px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Sans, sans-serif;
+  font-size: 19px;
   font-weight: 500;
   letter-spacing: 0.04em;
-  color: rgba(255, 255, 255, 0.52);
-  border-right: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.48);
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
 }
-.sv-ch-item:last-child {
-  border-right: none;
-}
+.sv-ch-item.is-intro { flex: 0.52; }
+.sv-ch-item:last-child { border-right: none; }
 .sv-ch-item.is-active {
   color: var(--sv-orange);
-  font-weight: 600;
+  font-weight: 700;
+  background: linear-gradient(180deg, rgba(255, 168, 0, 0.13) 0%, rgba(255, 168, 0, 0.02) 100%);
 }
 
-/* 风雅宋 Pure White Subtitle (54px, soft drop shadow, ZERO stroke, ZERO dark box, bottom: 66px) */
+/* 风雅宋 Pure White Punctuation-Free Subtitle (bottom: 64px) */
 #sv-subtitle {
   position: absolute;
-  left: 80px;
-  right: 80px;
-  bottom: 66px;
-  z-index: 200;
+  left: 90px;
+  right: 90px;
+  bottom: 64px;
+  z-index: 210;
   text-align: center;
   font-family: Song, serif;
   font-size: 54px;
@@ -199,7 +358,7 @@ html, body {
   letter-spacing: 0.03em;
   color: #ffffff;
   text-shadow:
-    0 3px 14px rgba(0, 0, 0, 0.88),
-    0 1px 3px rgba(0, 0, 0, 0.94);
+    0 2px 10px rgba(0, 0, 0, 0.90),
+    0 1px 2px rgba(0, 0, 0, 0.95);
   pointer-events: none;
 }

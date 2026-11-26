@@ -12,8 +12,8 @@
 | 阶段 | 模块 | 解决什么核心问题 |
 |---|---|---|
 | **1. 动工前：写稿、重写、收集素材与生成判断** | [`wlj-script-rewrite`](.agents/skills/wlj-script-rewrite/SKILL.md) | <ul><li>**路径 A（新选题未拍）**：按硅谷101 黄金四拍冷开场 + 三章推进从零写零废话初稿，杜绝前后重复与有词无画面。</li><li>**路径 B（口播已拍完）**：台词**只删不改**，基于实录逐字转写 + 原音频 `±0.25s` 最安静 `80ms` 响度核准剪口。</li><li>**全渠道收集素材 + 硬字幕体检**：检索 YouTube 历史广告、Wikimedia 公有领域馆藏大图、B 站演示与一手报道原文；强制跑 **8 帧底部字幕高危区体检**并登记 `画面来源：XX` 清单。</li><li>**LibTV 生成判断与飞书交付**：逐镜判定真实素材 / 原理画布 / `MAGI-2` 生成，按本地 BGM 的 BPM 与动态起伏初配每章音乐，一键输出飞书原生表格供审定。</li></ul> |
-| **2. 开剪后：粗剪、硅谷101 视效与成片返修** | [`product-video-edit`](.agents/skills/product-video-edit/SKILL.md) | <ul><li>**语义气口粗剪**：`-38 dB` 有效人声核收边 + 语义气口档位（`0.04s–0.26s`），4K `1.0 / 1.3` 景别切换自然遮蔽剪口。</li><li>**硅谷101 标准 OpenMotion 视效模板库**（[`templates/sv101/`](.agents/skills/product-video-edit/templates/sv101/)）：内置实拍压暗 **X 光聚光放大镜**、**外媒/官网原文荧光笔划重点**、**`#0E0F12` 十字微网格画布**、**滚动年份翻牌器**、**`4:6` 主持人列要点同屏**、**`38px` 常驻章节条**与**防 1 帧闪现底座**，杜绝手画简陋 PPT 线框。</li><li>**三道交付硬核验**：抽帧对照分镜表、`ffmpeg blackdetect` 零意外黑帧、`volumedetect` 响度平衡核验。</li></ul> |
-| **3. 可选外挂：AI 视频与动作预演工厂** | `guizang-magi2-skill` + `LibTV MCP` | 一键拉取并修复 Antigravity / Codex 上的 LibTV Remote MCP（解决桌面端软链 `npx` 找不到 `node` 及长视频 60s 超时断连问题），支持比喻/情绪镜头直出，以及 **Code to Video**（静音代码动作灰盒 → `MAGI-2` 全能参考帧级卡点重绘）。 |
+| **2. 开剪后：4K 音画同源精剪、硅谷101 视效与四道核验** | [`product-video-edit`](.agents/skills/product-video-edit/SKILL.md) | <ul><li>**4K 音画同源原子切片与防跳帧**：`1600 samples/frame @ 48kHz / 30fps` 帧对齐切片（全片音画误差 `< 10ms`），NG 重录只取最后完整遍，紧凑语义气口（`0.06s–0.23s`），相邻补录镜头用 4K `1.0x ↔ 1.3x` 景别交替消除跳帧。</li><li>**硅谷101 V5.1 标准视效模板库**（[`templates/sv101/`](.agents/skills/product-video-edit/templates/sv101/)）：内置**零底纹阴影大字**、**全篇常驻 `42px` 章节条**、**演进节点树 `#sv-era-tree`**、**不透明标签逻辑分支树**、**`<canvas>` 声学波束场**、**多维结论三幕动态看板**与**章节间 `0.40s` 光学推镜模糊丝滑转场**。</li><li>**四道交付硬核验**：16 镜全片口播互相关音画同步校验、Studio Linter 零报错、24 帧关键画面抽检、`blackdetect` + `volumedetect` 核验。</li></ul> |
+| **3. 商业隐喻生成管线：Nano Banana + LibTV `magi-2`** | `image-generator` + `guizang-magi2-skill` + `LibTV MCP` | 强制走 **Nano Banana / Imagen 先出风格统一的现代商业参考图 → LibTV `magi-2`（唯一锁定视频模型）生成现代商业隐喻视频**（如 `0101` 光纤代码水龙头、建筑光廊三棒转化、剧本撕裂化为金色 Token 粒子流，杜绝字面直译俗套画面），并支持静音代码动作灰盒帧级卡点重绘。 |
 
 ---
 

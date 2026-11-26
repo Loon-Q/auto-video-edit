@@ -1,161 +1,115 @@
 <!--
-  SV101 Standard Template 3: Episode Chrome & Core Stages
-  Includes the 4 recurring structural patterns defined in V5 visual-system.md:
-    1. Rolling Year Odometer (1890 -> 1985 -> 1998 -> 2015 -> 2022.11.30)
-    2. 0.3s Black Beat + 3.0s Chinese Chapter Card (dimmed real footage + "第N章" + Title)
-    3. 4:6 Host Bullet Split (used at most ONCE per episode when host gestures 1-2-3)
-    4. Constant 38px Bottom Chapter Bar + bottom:66px 风雅宋 shadow-only Subtitle
+  SV101 Standard Template 3 (V5.1 Upgraded): Episode Chrome, Era Node Tree & Silky Transitions
+  Includes the 4 core structural patterns defined in V5.1 visual-system.md:
+    1. Silky 0.40s Optical De-Blur Chapter Entry + Outgoing Push-Blur Seam (#seam-stage, ZERO black gap!)
+    2. 130-Year / Multi-Milestone Era Node Tree (#sv-era-tree, top-right coordinate map)
+    3. 4:6 Host Bullet Split (used at most ONCE per episode when host lists 1-2-3 points)
+    4. Constant Full-Episode 42px Bottom Chapter Bar (Frame 0 -> Final Frame) + Punctuation-Free Subtitle
 -->
 <template>
   <style>
-    /* 1. Rolling Year Odometer (Top-Left, CangEr 200px #FFA800) */
-    #sv-year-odometer {
-      position: absolute; top: 52px; left: 68px; height: 204px;
-      overflow: hidden; z-index: 85; pointer-events: none; opacity: 0;
-    }
-    #sv-year-strip {
-      display: flex; flex-direction: column;
-    }
-    .sv-year-row {
-      height: 204px; line-height: 204px;
-      font-family: CangEr, sans-serif;
-      font-size: 200px; color: #ffa800;
-      text-shadow: 0 12px 32px rgba(0, 0, 0, 0.80);
-      white-space: nowrap;
-    }
-
-    /* 2. Chapter Card (0.3s pure black lead-in + 3.0s dimmed real video/image backdrop) */
-    .sv-chapter-card {
-      position: absolute; inset: 0; background: #000000;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-    }
-    .sv-chapter-bg {
-      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
-      filter: brightness(0.38) contrast(1.06);
-      opacity: 0;
-    }
-    .sv-chapter-text {
-      position: relative; z-index: 5; text-align: center; opacity: 0;
-    }
-    .sv-chapter-no {
-      font-family: CangEr, sans-serif;
-      font-size: 64px; color: #ffa800; letter-spacing: 0.06em; margin-bottom: 20px;
-    }
-    .sv-chapter-title {
-      font-family: CangEr, sans-serif;
-      font-size: 160px; color: #ffffff; line-height: 1.02; letter-spacing: 0.03em;
-      text-shadow: 0 18px 48px rgba(0, 0, 0, 0.90);
-    }
-
-    /* 3. 4:6 Host Bullet Split (Left 768px #14161A, Right 1152px Host 1-2-3 Gesture) */
-    .sv-split-46 { position: absolute; inset: 0; background: #14161a; }
+    .sv-split-46 { position: absolute; inset: 0; background: #14161b; }
     .sv-split-left {
       position: absolute; left: 0; top: 0; bottom: 0; width: 768px;
-      background: #14161a;
+      background: #14161b;
       display: flex; flex-direction: column; justify-content: center;
-      padding: 0 72px; gap: 64px; z-index: 4;
+      padding: 0 64px; gap: 64px; z-index: 4;
     }
-    .sv-bullet-row {
-      display: flex; align-items: center; gap: 24px; opacity: 0;
-    }
-    .sv-bullet-sq {
-      width: 18px; height: 18px; background: #ffa800; flex-shrink: 0;
-    }
+    .sv-bullet-row { display: flex; align-items: center; gap: 22px; opacity: 0; }
+    .sv-bullet-sq { width: 18px; height: 18px; background: #ffa800; flex-shrink: 0; }
     .sv-bullet-txt {
-      font-family: CangEr, sans-serif; font-size: 72px; line-height: 1.05; color: #ffffff;
+      font-family: CangEr, sans-serif; font-size: 68px; line-height: 1.05;
+      color: #ffffff; white-space: nowrap; text-shadow: none !important;
     }
     .sv-split-right {
       position: absolute; left: 768px; top: 0; bottom: 0; width: 1152px; overflow: hidden; z-index: 3;
     }
-    .sv-split-right video {
-      width: 100%; height: 100%; object-fit: cover;
+    .sv-split-right video { width: 100%; height: 100%; object-fit: cover; }
+
+    /* Opaque Schematic Pills (z-index > SVG so connector lines NEVER strike through text!) */
+    .tree-pill {
+      position: absolute; padding: 14px 24px; border-radius: 12px;
+      background: #171a22; border: 1.5px solid rgba(255,255,255,0.22);
+      font-family: Sans, sans-serif; font-size: 25px; font-weight: 600;
+      color: rgba(255,255,255,0.86); white-space: nowrap; z-index: 15;
     }
+    .tree-pill.is-ok { border-color: #ffa800; background: #241e12; color: #ffd074; }
+    .tree-pill.is-bad-q { border-color: #ff3b30; background: #261416; color: #ff867f; }
   </style>
 
-  <!-- Example Structural Mounts -->
   <div id="sv-chrome-demo" data-hf-id="sv-chrome-demo" data-width="1920" data-height="1080">
-    <!-- Year Odometer -->
-    <div id="sv-year-odometer">
-      <div id="sv-year-strip">
-        <div class="sv-year-row">1890</div>
-        <div class="sv-year-row">1960</div>
-        <div class="sv-year-row">1975</div>
-        <div class="sv-year-row">1985</div>
-        <div class="sv-year-row">1998</div>
-        <div class="sv-year-row">2015</div>
-        <div class="sv-year-row">2022.11.30</div>
+    <div id="seam-stage">
+      <!-- 1. Silky Incoming Chapter Card (0.00 - 3.00s, ZERO black lead-in!) -->
+      <div id="sv-ch1-layer" class="sv-layer is-initial" style="background:#0e0f12;">
+        <video id="sv-ch1-bg" class="ch-card-bg" data-hf-id="v-ch1-bg" data-start="0" data-duration="3.05" src="assets/ch1_bg.mp4" muted playsinline></video>
+        <div id="sv-ch1-txt" class="ch-card-text">
+          <div class="ch-card-no">第一章</div>
+          <div class="ch-card-title">背了130年的台词</div>
+        </div>
+      </div>
+
+      <!-- 2. 4:6 Host Bullet Layer -->
+      <div id="sv-46-layer" class="sv-layer sv-split-46">
+        <div class="sv-split-left">
+          <div id="sv-b1" class="sv-bullet-row"><span class="sv-bullet-sq"></span><span class="sv-bullet-txt">家长看得到记录</span></div>
+          <div id="sv-b2" class="sv-bullet-row"><span class="sv-bullet-sq"></span><span class="sv-bullet-txt">出口前一键拦截</span></div>
+          <div id="sv-b3" class="sv-bullet-row"><span class="sv-bullet-sq"></span><span class="sv-bullet-txt">低成本切换配音</span></div>
+        </div>
+        <div class="sv-split-right">
+          <video id="v-host-123" data-hf-id="v-host-123" data-start="3.00" data-duration="11.00" src="assets/host_123.mp4" muted playsinline></video>
+        </div>
+      </div>
+
+      <!-- 3. 130-Year Era Node Tree -->
+      <div id="sv-era-tree">
+        <div class="era-rail-bg"></div>
+        <div id="era-rail-fill"></div>
+        <div class="era-nodes-row">
+          <div class="era-node is-current"><div class="era-dot"></div><div class="era-yr">1890</div><div class="era-tag">微缩留声机</div></div>
+          <div class="era-node"><div class="era-dot"></div><div class="era-yr">1960</div><div class="era-tag">拉绳唱片</div></div>
+          <div class="era-node"><div class="era-dot"></div><div class="era-yr">1985</div><div class="era-tag">双轨磁带</div></div>
+          <div class="era-node"><div class="era-dot"></div><div class="era-yr">1998</div><div class="era-tag">传感器计数</div></div>
+          <div class="era-node"><div class="era-dot"></div><div class="era-yr">2015</div><div class="era-tag">云端分支树</div></div>
+          <div class="era-node"><div class="era-dot"></div><div class="era-yr">2022</div><div class="era-tag">大模型破局</div></div>
+        </div>
       </div>
     </div>
 
-    <!-- Chapter Card Layer -->
-    <div id="sv-ch1-layer" class="sv-layer sv-chapter-card">
-      <img id="sv-ch1-bg" class="sv-chapter-bg" src="assets/edison_doll_real.jpg" alt="">
-      <div id="sv-ch1-txt" class="sv-chapter-text">
-        <div class="sv-chapter-no">第一章</div>
-        <div class="sv-chapter-title">背了130年的台词</div>
-      </div>
-    </div>
-
-    <!-- 4:6 Host Bullet Layer -->
-    <div id="sv-46-layer" class="sv-layer sv-split-46">
-      <div class="sv-split-left">
-        <div id="sv-b1" class="sv-bullet-row"><span class="sv-bullet-sq"></span><span class="sv-bullet-txt">家长看得到</span></div>
-        <div id="sv-b2" class="sv-bullet-row"><span class="sv-bullet-sq"></span><span class="sv-bullet-txt">说出口前能拦</span></div>
-        <div id="sv-b3" class="sv-bullet-row"><span class="sv-bullet-sq"></span><span class="sv-bullet-txt">换配音很便宜</span></div>
-      </div>
-      <div class="sv-split-right">
-        <video data-hf-id="v-host-123" data-start="10.00" data-duration="11.00" src="assets/host_123.mp4" muted playsinline></video>
-      </div>
-    </div>
-
-    <!-- Constant 38px Bottom Chapter Bar -->
+    <!-- 4. Constant Full-Episode 42px Bottom Chapter Bar (Pinned OUTSIDE #seam-stage so it stays rock-steady!) -->
     <div id="sv-chapter-bar">
       <div id="sv-chapter-progress"></div>
+      <div class="sv-ch-item is-intro">导语</div>
       <div class="sv-ch-item is-active">背了130年的台词</div>
       <div class="sv-ch-item">剧本被撕了</div>
       <div class="sv-ch-item">肚子里的传声筒</div>
       <div class="sv-ch-item">尾声</div>
     </div>
 
-    <!-- 风雅宋 Shadow-Only Subtitle -->
+    <!-- 风雅宋 Punctuation-Free Subtitle -->
     <div id="sv-subtitle"></div>
   </div>
 
   <script>
     (() => {
-      const ROW_H = 204;
       const tl = gsap.timeline({ paused: true });
 
-      // Helper: Chapter transition = 0.3s pure black beat -> 3.0s chapter card -> show chapter bar
-      function playChapterCard(tStart) {
-        tl.set('#sv-chapter-bar', { opacity: 0 }, tStart);
-        tl.set('#sv-ch1-layer', { visibility: 'visible', opacity: 1 }, tStart);
-        // 0.30s pure black pause before backdrop & title appear on low boom hit
-        tl.to('#sv-ch1-bg', { opacity: 1, duration: 0.25, ease: 'power2.out' }, tStart + 0.30);
-        tl.fromTo('#sv-ch1-bg', { scale: 1.0 }, { scale: 1.05, duration: 3.0, ease: 'none' }, tStart + 0.30);
-        tl.fromTo('#sv-ch1-txt', { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.28, ease: 'power3.out' }, tStart + 0.30);
-        tl.set('#sv-ch1-layer', { opacity: 0, visibility: 'hidden' }, tStart + 3.30);
-        tl.to('#sv-chapter-bar', { opacity: 1, duration: 0.25 }, tStart + 3.30);
-      }
+      // Continuous episode progress bar
+      tl.fromTo('#sv-chapter-progress', { width: '9.5%' }, { width: '33.2%', duration: 14.0, ease: 'none' }, 0.00);
 
-      // Helper: Roll year odometer to row index `idx` ("90 years" rolls smoothly past intermediate decades!)
-      function rollYearTo(idx, at, dur = 0.65) {
-        tl.set('#sv-year-odometer', { opacity: 1 }, Math.min(at, 3.30));
-        tl.to('#sv-year-strip', { y: -idx * ROW_H, duration: dur, ease: 'power3.inOut' }, at);
-      }
+      // Silky Seam In + Chapter Card (0.00 - 3.00)
+      tl.fromTo('#sv-ch1-bg', { scale: 1.10, filter: 'blur(12px) brightness(0.30)' }, { scale: 1.03, filter: 'blur(0px) brightness(0.38)', duration: 0.45, ease: 'power2.out' }, 0.00);
+      tl.to('#sv-ch1-bg', { scale: 1.07, duration: 2.55, ease: 'none' }, 0.45);
+      tl.fromTo('#sv-ch1-txt', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.32, ease: 'power3.out' }, 0.12);
+      tl.set('#sv-ch1-layer', { opacity: 0, visibility: 'hidden' }, 3.00);
 
-      playChapterCard(0.0);
-      rollYearTo(0, 3.30, 0.01); // 1890
-      rollYearTo(3, 6.00, 1.15); // Fast roll 1890 -> 1960 -> 1975 -> 1985 ("往后将近90年")
+      // 4:6 Host Bullet progressive reveal (pure GPU x/opacity transforms)
+      tl.set('#sv-46-layer', { visibility: 'visible', opacity: 1 }, 3.00);
+      tl.fromTo('#sv-b1', { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.24, ease: 'power3.out' }, 3.30);
+      tl.fromTo('#sv-b2', { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.24, ease: 'power3.out' }, 6.20);
+      tl.fromTo('#sv-b3', { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.24, ease: 'power3.out' }, 9.10);
 
-      // 4:6 Host Bullet progressive reveal (hide year odometer so max 1 focal group is on screen!)
-      tl.set('#sv-year-odometer', { opacity: 0 }, 10.00);
-      tl.set('#sv-46-layer', { visibility: 'visible', opacity: 1 }, 10.00);
-      tl.fromTo('#sv-b1', { opacity: 0, x: -18 }, { opacity: 1, x: 0, duration: 0.26, ease: 'power3.out' }, 10.40);
-      tl.to('#sv-b1', { opacity: 0.65, duration: 0.20 }, 13.20);
-      tl.fromTo('#sv-b2', { opacity: 0, x: -18 }, { opacity: 1, x: 0, duration: 0.26, ease: 'power3.out' }, 13.20);
-      tl.to('#sv-b2', { opacity: 0.65, duration: 0.20 }, 16.00);
-      tl.fromTo('#sv-b3', { opacity: 0, x: -18 }, { opacity: 1, x: 0, duration: 0.26, ease: 'power3.out' }, 16.00);
+      // Silky Seam Out (last 0.40s = 12 frames before xfade into next chapter)
+      tl.to('#seam-stage', { scale: 1.10, filter: 'blur(14px) brightness(0.36)', duration: 0.40, ease: 'power2.in' }, 13.60);
 
       window.__timelines = window.__timelines || {};
       window.__timelines['sv101-chrome-demo'] = tl;
