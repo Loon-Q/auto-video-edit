@@ -1,0 +1,100 @@
+<!--
+  SV101 Standard Template 2: Press / Official Doc Highlighter (对标《苹果关税》报道原文划重点)
+  Usage:
+    - Capture a clean 1920x1080 crop of the real article / blog / datasheet page.
+    - Set `SOURCE_TEXT` ("画面来源：Fast Company (2015)") — auto-fades out at 3.0s.
+    - Set `BARS` coordinates (x, y, w, h, at) matching the exact sentence to highlight in #FFA800.
+    - Optional: set `HERO_STAT` (e.g. "8000+") to pop AFTER the highlighter finishes sweeping.
+-->
+<template>
+  <style>
+    .ev-stage { position: absolute; inset: 0; overflow: hidden; background: #0e0f12; }
+    .ev-zoom-rig {
+      position: absolute; inset: 0; width: 1920px; height: 1080px;
+      transform-origin: 50% 46%;
+    }
+    .ev-doc-img {
+      position: absolute; inset: 0; width: 1920px; height: 1080px; object-fit: cover;
+    }
+    .ev-bar {
+      position: absolute;
+      background: rgba(255, 168, 0, 0.38);
+      border-bottom: 3px solid #ffa800;
+      border-radius: 3px;
+      transform-origin: left center;
+      transform: scaleX(0);
+    }
+    /* For white/light-background articles, add class `is-light-doc` on #ev-root */
+    .is-light-doc .ev-bar {
+      mix-blend-mode: multiply;
+      background: rgba(255, 168, 0, 0.44);
+    }
+    .ev-vignette {
+      position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse 78% 72% at 50% 48%, transparent 52%, rgba(8, 9, 12, 0.58) 100%);
+    }
+    .ev-stat-pop {
+      position: absolute; right: 96px; bottom: 156px;
+      font-family: CangEr, sans-serif;
+      font-size: 220px; line-height: 0.92;
+      color: #ffa800;
+      filter: drop-shadow(0 20px 48px rgba(0, 0, 0, 0.88));
+      opacity: 0;
+      pointer-events: none;
+    }
+  </style>
+
+  <div id="ev-root" class="ev-stage is-light-doc" data-hf-id="ev-root" data-width="1920" data-height="1080">
+    <div id="ev-rig" class="ev-zoom-rig">
+      <img class="ev-doc-img" src="assets/press_article_1080p.png" alt="">
+      <div id="ev-bars-mount"></div>
+    </div>
+    <div class="ev-vignette"></div>
+    <div id="ev-source" class="sv-source-tag">画面来源：Fast Company (2015)</div>
+    <div id="ev-stat" class="ev-stat-pop">8000+</div>
+  </div>
+
+  <script>
+    (() => {
+      const BARS = [
+        { x: 260, y: 418, w: 1180, h: 46, at: 0.55 },
+        { x: 260, y: 474, w: 840,  h: 46, at: 0.95 },
+      ];
+      const SHOW_STAT_AT = 1.55; // Set to null if no giant number pop is needed
+
+      const mount = document.getElementById('ev-bars-mount');
+      const tl = gsap.timeline({ paused: true });
+
+      // Continuous subtle camera drift (prevents dead still screenshot)
+      tl.fromTo('#ev-rig', { scale: 1.0 }, { scale: 1.035, duration: 4.5, ease: 'none' }, 0);
+
+      // 3rd-party source label fades out cleanly after 3.0s
+      tl.to('#ev-source', { opacity: 0, duration: 0.40, ease: 'power2.out' }, 3.00);
+
+      BARS.forEach((b) => {
+        const el = document.createElement('div');
+        el.className = 'ev-bar';
+        el.style.left = `${b.x}px`;
+        el.style.top = `${b.y}px`;
+        el.style.width = `${b.w}px`;
+        el.style.height = `${b.h}px`;
+        mount.appendChild(el);
+        tl.to(el, { scaleX: 1, duration: 0.45, ease: 'power2.out' }, b.at);
+      });
+
+      if (SHOW_STAT_AT !== null) {
+        // Dim & softly defocus underlying article text when hero stat pops so text never collides
+        tl.to('#ev-rig', { filter: 'brightness(0.40) blur(3px)', duration: 0.26, ease: 'power2.out' }, SHOW_STAT_AT);
+        tl.fromTo(
+          '#ev-stat',
+          { opacity: 0, y: 28, scale: 0.92 },
+          { opacity: 1, y: 0, scale: 1.0, duration: 0.28, ease: 'power3.out' },
+          SHOW_STAT_AT
+        );
+      }
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines['sv101-evidence-highlighter'] = tl;
+    })();
+  </script>
+</template>

@@ -1,0 +1,205 @@
+/* ==========================================================================
+   Silicon Valley 101 × 未来陪伴局 V5 Standard Visual Base (1920x1080 @ 30fps)
+   - Packaging Headline Font : CangEr (仓耳体.ttf)
+   - Subtitle Font           : Song (风雅宋.ttf, pure white + soft shadow, NO stroke)
+   - Brand Highlight         : #FFA800 | Alert Red : #FF3B30 | Canvas : #0E0F12
+   - Anti-1-Frame-Flash      : .sv-layer enforces opacity:0 + isolation:isolate
+   ========================================================================== */
+
+@font-face {
+  font-family: CangEr;
+  src: url("assets/fonts/CangEr.ttf") format("truetype");
+  font-weight: 400 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: Song;
+  src: url("assets/fonts/Song.ttf") format("truetype");
+  font-weight: 400 700;
+  font-style: normal;
+}
+
+:root {
+  --sv-canvas: #0e0f12;
+  --sv-panel-dark: #14161a;
+  --sv-orange: #ffa800;
+  --sv-red: #ff3b30;
+  --sv-white: #ffffff;
+  --sv-muted: rgba(255, 255, 255, 0.52);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  background: #000000;
+  color: var(--sv-white);
+  font-family: CangEr, -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#main {
+  position: relative;
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  background: #000000;
+}
+
+/* CRITICAL: Prevents Hyperframes <video data-start> from flashing 1 frame early
+   or leaking child z-index layers across adjacent shots */
+.sv-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  isolation: isolate;
+}
+
+.sv-layer.is-initial {
+  opacity: 1;
+  visibility: visible;
+}
+
+.sv-fullscreen-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 4:3 Archival Video Pillarbox-Blur Stage (preserves grain, ZERO frame border) */
+.sv-archival-43-stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #000000;
+}
+.sv-archival-43-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.42);
+  filter: blur(36px) brightness(0.48) saturate(0.92);
+}
+.sv-archival-43-fg {
+  position: relative;
+  display: block;
+  height: 100%;
+  width: auto;
+  margin: 0 auto;
+  object-fit: contain;
+  box-shadow: 0 0 64px rgba(0, 0, 0, 0.72);
+}
+
+/* Near-Black Precision Crosshair Grid Canvas (#0E0F12, matches SV101《1nm》) */
+.sv-schematic-bg {
+  position: absolute;
+  inset: 0;
+  background-color: var(--sv-canvas);
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.032) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.032) 1px, transparent 1px),
+    radial-gradient(circle at 0 0, rgba(255, 255, 255, 0.10) 1.5px, transparent 2px);
+  background-size: 120px 120px;
+  background-position: 60px 60px;
+}
+
+/* Top-Left 3rd-Party Source Attribution (22px, 70% white, fades out after 3.0s) */
+.sv-source-tag {
+  position: absolute;
+  top: 28px;
+  left: 36px;
+  z-index: 90;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.70);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85);
+  pointer-events: none;
+}
+
+/* Packaging Big Keyword Typography (CangEr >= 120px, max 1 focal group per screen) */
+.sv-big-word {
+  font-family: CangEr, sans-serif;
+  font-size: 160px;
+  line-height: 0.96;
+  letter-spacing: 0.02em;
+  color: var(--sv-white);
+  text-shadow: 0 16px 42px rgba(0, 0, 0, 0.88);
+}
+.sv-big-word.is-orange { color: var(--sv-orange); }
+.sv-big-word.is-red { color: var(--sv-red); }
+
+/* Constant 38px Bottom Chapter Bar (NO logo block, NO English) */
+#sv-chapter-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 38px;
+  z-index: 180;
+  background: rgba(12, 13, 16, 0.86);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+}
+#sv-chapter-progress {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 2px;
+  width: 0%;
+  background: var(--sv-orange);
+}
+.sv-ch-item {
+  flex: 1;
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.52);
+  border-right: 1px solid rgba(255, 255, 255, 0.14);
+}
+.sv-ch-item:last-child {
+  border-right: none;
+}
+.sv-ch-item.is-active {
+  color: var(--sv-orange);
+  font-weight: 600;
+}
+
+/* 风雅宋 Pure White Subtitle (54px, soft drop shadow, ZERO stroke, ZERO dark box, bottom: 66px) */
+#sv-subtitle {
+  position: absolute;
+  left: 80px;
+  right: 80px;
+  bottom: 66px;
+  z-index: 200;
+  text-align: center;
+  font-family: Song, serif;
+  font-size: 54px;
+  line-height: 1.18;
+  letter-spacing: 0.03em;
+  color: #ffffff;
+  text-shadow:
+    0 3px 14px rgba(0, 0, 0, 0.88),
+    0 1px 3px rgba(0, 0, 0, 0.94);
+  pointer-events: none;
+}

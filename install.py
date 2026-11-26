@@ -37,16 +37,21 @@ def copy_skill(src: Path, dst: Path, upgrade: bool) -> str:
 def global_roots() -> list[Path]:
     home = Path.home()
     roots = [home / ".gemini" / "config" / "skills"]
-    codex_dir = home / ".codex"
-    if codex_dir.is_dir():
-        roots.append(codex_dir / "skills")
+    for optional_parent in (home / ".codex", home / ".agents"):
+        if optional_parent.is_dir():
+            roots.append(optional_parent / "skills")
     return roots
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("workspace", nargs="?", type=Path, default=None, help="剪辑项目目录（安装到 <项目>/.agents/skills/）")
-    parser.add_argument("--global", dest="install_global", action="store_true", help="安装到本机全局（Antigravity ~/.gemini/config/skills 与 Codex ~/.codex/skills）")
+    parser.add_argument(
+        "--global",
+        dest="install_global",
+        action="store_true",
+        help="同步安装到本机所有全局技能目录（Antigravity ~/.gemini/config/skills、Codex ~/.codex/skills 及 ~/.agents/skills）",
+    )
     parser.add_argument("--upgrade", action="store_true", help="覆盖升级已安装的同名技能")
     parser.add_argument("--with-libtv", action="store_true", help="同时拉取 guizang-magi2-skill 并自动配置双端 LibTV MCP")
     args = parser.parse_args()
