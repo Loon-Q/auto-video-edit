@@ -21,9 +21,22 @@ import numpy as np
 
 SR = 16000
 HOP = 0.01          # 10ms 一帧
-LEAD, TAIL = 0.15, 0.20
-KEEP_MAX = 0.35
-TARGET = {"hesitation": 0.40, "comma": 0.40, "period": 0.55, "paragraph": 0.70, "splice": 0.04}
+# 已验收口播节奏（紧促自然对话流，消除分段录制顿感）
+LEAD, TAIL = 0.06, 0.16
+KEEP_MAX = 0.22
+CORE_DB = -38.0     # 收紧有声段首尾拖尾的参考电平
+CORE_LEAD, CORE_TAIL = 0.03, 0.05
+TARGET = {
+    "splice": 0.04,      # 句内删口癖拼接
+    "seamless": 0.08,    # 同口气顺接 / 强反差紧顶 / 排比连问
+    "flow": 0.13,        # 流畅句转 / 悬念小顿
+    "turn": 0.18,        # 轻段转 / 进总纲 / 故事展开
+    "chapter": 0.26,     # 真正换景 / 换大章节
+    "hesitation": 0.12,
+    "comma": 0.12,
+    "period": 0.16,
+    "paragraph": 0.22,
+}
 LABELS = set(TARGET) | {"keep"}
 AUDIO_CODEC = {".m4a": ["-c:a", "aac", "-b:a", "192k"], ".aac": ["-c:a", "aac", "-b:a", "192k"],
                ".mp3": ["-c:a", "libmp3lame", "-q:a", "2"], ".wav": ["-c:a", "pcm_s16le"],
@@ -148,6 +161,17 @@ def detect_speech(db, margin_db=10.0, min_speech=0.08, min_gap=0.12, fixed_thr=N
             final[-1][1] = e
         else:
             final.append([s, e])
+    # 收紧分条录制自带的静音拖尾：按 CORE_DB 人声核外仅保留 CORE_LEAD / CORE_TAIL
+    core_thr = max(CORE_DB, thr - 4.0)
+    for seg in final:
+        a = int(round(seg[0] / HOP))
+        b = min(n, int(round(seg[1] / HOP)))
+        above = np.where(db[a:b] > core_thr)[0]
+        if len(above):
+            cs = (a + int(above[0])) * HOP
+            ce = (a + int(above[-1]) + 1) * HOP
+            seg[0] = max(seg[0], round(cs - CORE_LEAD, 3))
+            seg[1] = min(seg[1], round(ce + CORE_TAIL, 3))
     return final, float(thr), float(floor)
 
 

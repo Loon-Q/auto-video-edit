@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Local setup, rough cutting, and native OpenMotion commands on macOS and Windows."""
+"""Local setup, rough cutting, LibTV integration, and native OpenMotion commands on macOS and Windows."""
 import argparse
 import json
 import os
@@ -10,6 +10,7 @@ import sys
 import tempfile
 import venv
 
+from libtv_setup import configure_libtv
 from openmotion_rpc import run_mcp
 
 
@@ -19,17 +20,26 @@ SOURCE = ROOT / "openmotion"
 UPSTREAM = "https://github.com/nexu-io/openmotion.git"
 REVISION = "a44c714d0e702f3b9b02be8a7512bbf278c6294b"
 MIN_NODE = (22, 18, 0)
+CORE_PIP_PACKAGES = ("numpy==2.3.5", "faster-whisper", "yt-dlp")
+STICKER_PIP_PACKAGES = ("pillow", "scipy")
+
+
+def venv_bin_dir():
+    return ROOT / "venv" / ("Scripts" if os.name == "nt" else "bin")
 
 
 def media_env():
     env = os.environ.copy()
-    env["PATH"] = str(ROOT / "bin") + os.pathsep + env.get("PATH", "")
+    extra_dirs = [str(ROOT / "bin"), str(venv_bin_dir()), str(Path.home() / ".local" / "bin")]
+    if sys.platform == "darwin":
+        extra_dirs += [str(Path.home() / ".local/share/node/bin"), "/opt/homebrew/bin", "/usr/local/bin"]
+    env["PATH"] = os.pathsep.join(extra_dirs + [env.get("PATH", "")])
     env["OPENMOTION_TELEMETRY"] = "0"
     env["PYTHONIOENCODING"] = "utf-8"
-    for binary in ("ffmpeg", "ffprobe"):
-        found = shutil.which(binary, path=env["PATH"])
+    for binary_name in ("ffmpeg", "ffprobe"):
+        found = shutil.which(binary_name, path=env["PATH"])
         if found:
-            env["HYPERFRAMES_" + binary.upper() + "_PATH"] = str(Path(found).resolve())
+            env["HYPERFRAMES_" + binary_name.upper() + "_PATH"] = str(Path(found).resolve())
     chrome_var = env.get("HYPERFRAMES_BROWSER_PATH") or env.get("MOTION_BROWSER_PATH")
     candidates = ["google-chrome", "chromium", "chromium-browser", "chrome"]
     guesses = [Path(p) for p in (shutil.which(n, path=env["PATH"]) for n in candidates) if p]
@@ -73,8 +83,10 @@ def video_python():
     return str(path) if path.is_file() else sys.executable
 
 
-def numpy_ready(env):
-    return subprocess.run([video_python(), "-c", "import numpy"], env=env, capture_output=True).returncode == 0
+def module_ready(mod_name, env):
+    return subprocess.run(
+        [video_python(), "-c", f"import {mod_name}"], env=env, capture_output=True
+    ).returncode == 0
 
 
 def require_media(env):
@@ -87,6 +99,21 @@ def source_ready():
     return (SOURCE / "mcp.ts").is_file() and (SOURCE / "studio/build/index.html").is_file() and (SOURCE / "node_modules").is_dir()
 
 
+def detect_guizang_skill():
+    candidates = [
+        HERE.parent.parent / "guizang-magi2-skill" / "SKILL.md",
+        Path.home() / ".gemini" / "config" / "skills" / "guizang-magi2-skill" / "SKILL.md",
+        Path.home() / ".codex" / "skills" / "guizang-magi2-skill" / "SKILL.md",
+    ]
+    found = next((p.parent for p in candidates if p.is_file()), None)
+    return str(found) if found else None
+
+
+def detect_libtv_mcp():
+    agy_cfg = Path.home() / ".gemini" / "config" / "plugins" / "libtv" / "mcp_config.json"
+    return str(agy_cfg) if agy_cfg.is_file() else None
+
+
 def doctor(env):
     try:
         node = output([node_command(env), "--version"], env)
@@ -94,7 +121,11 @@ def doctor(env):
         node = None
     states = {
         "python": sys.version.split()[0],
-        "numpy": numpy_ready(env),
+        "venv_python": video_python(),
+        "numpy": module_ready("numpy", env),
+        "faster_whisper": module_ready("faster_whisper", env),
+        "yt_dlp": bool(shutil.which("yt-dlp", path=env["PATH"])) or module_ready("yt_dlp", env),
+        "lark_cli": shutil.which("lark-cli", path=env["PATH"]),
         "git": shutil.which("git", path=env["PATH"]),
         "node": node,
         "npm": shutil.which("npm", path=env["PATH"]),
@@ -102,20 +133,31 @@ def doctor(env):
         "ffprobe": env.get("HYPERFRAMES_FFPROBE_PATH"),
         "chrome": env.get("HYPERFRAMES_BROWSER_PATH"),
         "openmotion": str(SOURCE) if source_ready() else None,
+        "guizang_magi2_skill": detect_guizang_skill(),
+        "libtv_mcp": detect_libtv_mcp(),
     }
     print(json.dumps(states, ensure_ascii=False, indent=2))
-    return 0 if all(states[k] for k in ("numpy", "node", "ffmpeg", "ffprobe", "chrome", "openmotion")) else 1
+    core_keys = ("numpy", "faster_whisper", "yt_dlp", "node", "ffmpeg", "ffprobe", "chrome", "openmotion")
+    return 0 if all(states[k] for k in core_keys) else 1
 
 
-def setup(env):
+def setup(env, with_stickers=False, with_libtv=False):
     node_command(env)
     require_media(env)
     git = binary("git", env)
     npm = binary("npm", env)
     ROOT.mkdir(parents=True, exist_ok=True)
-    if not numpy_ready(env):
-        venv.EnvBuilder(with_pip=True).create(ROOT / "venv")
-        subprocess.run([video_python(), "-m", "pip", "install", "numpy==2.3.5"], env=env, check=True)
+
+    if not Path(video_python()).is_file() or Path(video_python()).resolve() == Path(sys.executable).resolve():
+        if not (ROOT / "venv").is_dir():
+            venv.EnvBuilder(with_pip=True).create(ROOT / "venv")
+
+    needed_mods = [("numpy", "numpy==2.3.5"), ("faster_whisper", "faster-whisper"), ("yt_dlp", "yt-dlp")]
+    if with_stickers:
+        needed_mods += [("PIL", "pillow"), ("scipy", "scipy")]
+    missing_pkgs = [pkg for mod, pkg in needed_mods if not module_ready(mod, env)]
+    if missing_pkgs:
+        subprocess.run([video_python(), "-m", "pip", "install", *missing_pkgs], env=env, check=True)
 
     if SOURCE.exists():
         actual = output([git, "rev-parse", "HEAD"], env, SOURCE)
@@ -137,6 +179,13 @@ def setup(env):
                 subprocess.run([npm, *args], cwd=checkout, env=build_env, check=True)
             if checkout != SOURCE:
                 checkout.rename(SOURCE)
+
+    if with_libtv:
+        targets = [Path.home() / ".gemini" / "config" / "skills" / "guizang-magi2-skill"]
+        if (Path.home() / ".codex" / "skills").is_dir():
+            targets.append(Path.home() / ".codex" / "skills" / "guizang-magi2-skill")
+        configure_libtv(skill_targets=targets, apply_codex=True)
+
     return doctor(env)
 
 
@@ -168,19 +217,30 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("doctor")
-    commands.add_parser("setup")
+
+    setup_p = commands.add_parser("setup")
+    setup_p.add_argument("--with-stickers", action="store_true", help="同时安装刀版白边贴纸所需的 pillow 与 scipy")
+    setup_p.add_argument("--with-libtv", action="store_true", help="同时拉取 guizang-magi2-skill 并配置 LibTV MCP")
+
+    libtv_p = commands.add_parser("libtv")
+    libtv_p.add_argument("libtv_args", nargs=argparse.REMAINDER)
+
     rough = commands.add_parser("rough")
     rough.add_argument("rough_args", nargs=argparse.REMAINDER)
+
     motion = commands.add_parser("openmotion")
     motion.add_argument("mode", choices=("studio", "mcp", "tools", "call"))
     motion.add_argument("workspace", type=Path)
     motion.add_argument("tool_args", nargs=argparse.REMAINDER)
+
     args = parser.parse_args()
     env = media_env()
     if args.command == "doctor":
         return doctor(env)
     if args.command == "setup":
-        return setup(env)
+        return setup(env, with_stickers=args.with_stickers, with_libtv=args.with_libtv)
+    if args.command == "libtv":
+        return subprocess.call([sys.executable, str(HERE / "libtv_setup.py"), *args.libtv_args], env=env)
     if args.command == "rough":
         for tool in ("ffmpeg", "ffprobe"):
             binary(tool, env)
