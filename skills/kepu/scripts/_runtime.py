@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Cross-platform runtime & binary discovery for wlj-script-rewrite (macOS + Windows)."""
+"""Cross-platform runtime & binary discovery for @kepu / @科普 (macOS + Windows)."""
 from __future__ import annotations
 
 import importlib
@@ -11,10 +11,16 @@ import sys
 
 
 def runtime_root() -> Path:
-    custom = os.environ.get("PRODUCT_VIDEO_RUNTIME")
+    custom = os.environ.get("KEPU_RUNTIME") or os.environ.get("PRODUCT_VIDEO_RUNTIME")
     if custom:
         return Path(custom).expanduser().resolve()
-    return (Path.home() / ".local" / "share" / "product-video-edit").resolve()
+    kepu_rt = Path.home() / ".local" / "share" / "kepu-video"
+    legacy_rt = Path.home() / ".local" / "share" / "product-video-edit"
+    if kepu_rt.exists():
+        return kepu_rt.resolve()
+    if legacy_rt.exists():
+        return legacy_rt.resolve()
+    return kepu_rt.resolve()
 
 
 def venv_dir() -> Path:
@@ -42,24 +48,25 @@ def ensure_packages(*modules: str) -> None:
         return
 
     vp = venv_python()
-    if vp and os.environ.get("_WLJ_REEXEC") != "1":
+    if vp and os.environ.get("_KEPU_REEXEC") != "1":
         try:
             same = Path(sys.executable).resolve() == vp.resolve()
         except OSError:
             same = False
         if not same:
             env = os.environ.copy()
-            env["_WLJ_REEXEC"] = "1"
+            env["_KEPU_REEXEC"] = "1"
             env["PYTHONIOENCODING"] = "utf-8"
             if os.name == "nt":
                 sys.exit(subprocess.call([str(vp), *sys.argv], env=env))
             os.execve(str(vp), [str(vp), *sys.argv], env)
 
+    setup_script = Path(__file__).resolve().parent / "video_edit.py"
     mods_str = ", ".join(missing)
     sys.exit(
         f"[ERROR] 当前 Python 环境缺少依赖：{mods_str}\n"
-        f"请先在项目目录运行：python3 .agents/skills/product-video-edit/scripts/video_edit.py setup\n"
-        f"（Windows PowerShell 使用：py -3 .agents/skills/product-video-edit/scripts/video_edit.py setup）"
+        f"请先运行：python3 \"{setup_script}\" setup\n"
+        f"（Windows PowerShell 使用：py -3 \"{setup_script}\" setup）"
     )
 
 

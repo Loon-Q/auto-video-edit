@@ -1,4 +1,0 @@
-interface:
-  display_name: "科技解说脚本创作与重写"
-  short_description: "对标硅谷101从零写稿或已拍口播只删不改，含全渠道素材无字幕体检、视效参数与LibTV判断"
-  default_prompt: "用 $wlj-script-rewrite 对标硅谷101完成这期脚本、分镜、素材收集清单与LibTV生成判断，输出到飞书文档。"

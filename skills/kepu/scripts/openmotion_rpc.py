@@ -25,7 +25,7 @@ def run_mcp(command, cwd, env, name=None, arguments=None):
             request(1, "initialize", {
                 "protocolVersion": "2025-03-26",
                 "capabilities": {},
-                "clientInfo": {"name": "product-video-edit", "version": "1.0.0"},
+                "clientInfo": {"name": "kepu", "version": "5.1.0"},
             })
             send({"jsonrpc": "2.0", "method": "notifications/initialized"})
             if name is None:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """逐字转写（带字级时间戳）。以实录为准写脚本时使用。
 
-自动发现本机 product-video-edit 运行环境（无需手动指定 venv 路径，兼容 macOS 与 Windows）：
+自动发现本机 kepu 运行环境（无需手动指定 venv 路径，兼容 macOS 与 Windows）：
   python3 transcribe_words.py --out transcript.json act0.wav:0 act1.wav:54.0 act2.wav:127.53
   py -3 transcribe_words.py --out transcript.json "D:\\素材\\act0.wav:0"
 

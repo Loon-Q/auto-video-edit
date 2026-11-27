@@ -14,7 +14,20 @@ from libtv_setup import configure_libtv
 from openmotion_rpc import run_mcp
 
 
-ROOT = Path(os.environ.get("PRODUCT_VIDEO_RUNTIME") or Path.home() / ".local/share/product-video-edit").resolve()
+def _resolve_root() -> Path:
+    custom = os.environ.get("KEPU_RUNTIME") or os.environ.get("PRODUCT_VIDEO_RUNTIME")
+    if custom:
+        return Path(custom).expanduser().resolve()
+    kepu_rt = Path.home() / ".local/share/kepu-video"
+    legacy_rt = Path.home() / ".local/share/product-video-edit"
+    if kepu_rt.exists():
+        return kepu_rt.resolve()
+    if legacy_rt.exists():
+        return legacy_rt.resolve()
+    return kepu_rt.resolve()
+
+
+ROOT = _resolve_root()
 HERE = Path(__file__).resolve().parent
 SOURCE = ROOT / "openmotion"
 UPSTREAM = "https://github.com/nexu-io/openmotion.git"

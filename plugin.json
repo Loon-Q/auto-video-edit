@@ -1,0 +1,18 @@
+{
+  "name": "kepu",
+  "displayName": "硅谷101深度科普 (@科普)",
+  "version": "5.1.0",
+  "description": "【@kepu / @科普】面向 5–15 分钟科技商业深度科普长视频（对标硅谷101）的独立闭环工作流：从零写稿或已拍口播只删不改重写、全网无字幕史料8帧体检、飞书原生表格审定、4K音画同源原子切片、Nano Banana + magi-2 现代商业隐喻生成、硅谷101视效分段精渲与四道质检导出。",
+  "author": {
+    "name": "Loon-Q",
+    "url": "https://github.com/Loon-Q/auto-video-edit"
+  },
+  "homepage": "https://github.com/Loon-Q/auto-video-edit",
+  "repository": "https://github.com/Loon-Q/auto-video-edit",
+  "logo": "assets/kepu-icon.svg",
+  "suggestedPrompts": [
+    "@科普 帮我从零写一期新选题的硅谷101深度科普脚本与分镜，搜好无字幕真实史料发飞书给我审",
+    "@科普 这期口播已经拍好了，帮我只删不改重写分镜、实测剪口响度并发飞书文档审定",
+    "@科普 飞书脚本已拍板，按V5.1标准做4K音画同源粗剪、商业隐喻生成与全片分段精修导出"
+  ]
+}

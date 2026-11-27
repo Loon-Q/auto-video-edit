@@ -98,7 +98,10 @@ def find_node_and_npx() -> tuple[str, list[str]]:
 
 
 def build_clean_path(front_dirs: list[str]) -> str:
-    runtime_root = Path(os.environ.get("PRODUCT_VIDEO_RUNTIME") or Path.home() / ".local" / "share" / "product-video-edit")
+    custom = os.environ.get("KEPU_RUNTIME") or os.environ.get("PRODUCT_VIDEO_RUNTIME")
+    legacy_rt = Path.home() / ".local" / "share" / "product-video-edit"
+    kepu_rt = Path.home() / ".local" / "share" / "kepu-video"
+    runtime_root = Path(custom) if custom else (kepu_rt if kepu_rt.exists() else (legacy_rt if legacy_rt.exists() else kepu_rt))
     extra = list(front_dirs) + [str(runtime_root / "bin")]
     if os.name == "nt":
         sys_entries = [p for p in os.environ.get("PATH", "").split(os.pathsep) if p]

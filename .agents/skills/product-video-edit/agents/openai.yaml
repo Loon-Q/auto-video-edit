@@ -1,4 +1,0 @@
-interface:
-  display_name: "真人产品视频剪辑"
-  short_description: "先审素材与制作分镜，再剪气口、试剪开头并按聊天意见返修真人产品片"
-  default_prompt: "用 $product-video-edit 看脚本和素材，整理我们自己的制作分镜。"
